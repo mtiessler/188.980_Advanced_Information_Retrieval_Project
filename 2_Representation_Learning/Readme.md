@@ -21,7 +21,7 @@ longeval-retrieval-project/
 │   ├── run_2024-11.txt                 <-- Will be generated (example)
 │   └── run_2024-12.txt                 <-- Will be generated (example)
 │
-├── config.yaml                         <-- The configuration file
+├── abstract_config.yaml                <-- The abstract dataset config file
 ├── requirements.txt                    <-- Python libraries needed
 ├── utils.py                            <-- Utility functions (config loader)
 ├── data_loader.py                      <-- Data loading code
