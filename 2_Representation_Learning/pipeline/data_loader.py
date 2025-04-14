@@ -56,7 +56,7 @@ def load_documents(config):
                             content_parts = [doc_data.get(field, '') or '' for field in config['doc_content_fields']]
                             non_empty_parts = [part for part in content_parts if part and part.strip()]
                             documents_content[doc_id] = separator.join(non_empty_parts)
-                        if len(documents_content) >= 1000: break
+                        # if len(documents_content) >= 5000: break JUST FOR TESTING
                     except json.JSONDecodeError:
                         logging.warning(f"Skipping invalid JSON line in {file_path}: {line.strip()}")
                     except Exception as e_line:

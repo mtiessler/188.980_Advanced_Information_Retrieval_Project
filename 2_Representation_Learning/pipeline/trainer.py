@@ -39,7 +39,7 @@ def prepare_training_data(config, queries, qrels_df, documents_content, max_samp
         if config['st_loss'] == "TripletLoss":
             for pos_doc_id in positive_docs:
                 if pos_doc_id not in documents_content:
-                    logging.info(f"Positive doc {pos_doc_id} missing in content. Skipping.")
+                    # logging.info(f"Positive doc {pos_doc_id} missing in content. Skipping.")
                     continue
 
                 pos_doc_text = documents_content[pos_doc_id]
@@ -60,7 +60,7 @@ def prepare_training_data(config, queries, qrels_df, documents_content, max_samp
         elif config['st_loss'] == "MultipleNegativesRankingLoss":
             for pos_doc_id in positive_docs:
                 if pos_doc_id not in documents_content:
-                    logging.info(f"Positive doc {pos_doc_id} missing in content. Skipping.")
+                    # logging.info(f"Positive doc {pos_doc_id} missing in content. Skipping.")
                     continue
 
                 pos_doc_text = documents_content[pos_doc_id]
