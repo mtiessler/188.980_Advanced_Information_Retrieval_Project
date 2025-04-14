@@ -1,0 +1,53 @@
+# --- File Paths & Directories ---
+data_dir: ./data/longeval_sci_training_2025_abstract
+queries_file_name: "queries.txt"
+qrels_file_name: "qrels.txt"
+documents_dir_name: "documents"
+output_dir: "output"
+
+# --- Output file names ---
+doc_embeddings_file_name: "doc_embeddings.index"
+doc_ids_file_name: "doc_ids.pkl"
+fine_tuned_model_dir_name: "fine_tuned_scibert"
+run_file_name_template: "run_{snapshot_id}.txt" # For evaluation output
+
+# --- Model Configuration ---
+# model_name: "allenai/scibert_scivocab_uncased"
+model_name_or_path: "allenai/scibert_scivocab_uncased" # Can be path to fine-tuned model
+max_seq_length: 512 # 512 for standard SciBERT
+
+# --- Hardware ---
+device: "cuda" # cuda / cpu
+
+# --- Data Processing ---
+doc_content_fields: ["title", "abstract"] # Add "fulltext" if using full-text version
+text_separator: " [SEP] " # Separator for concatenating title/abstract
+
+# --- Embedding Configuration ---
+embedding_batch_size: 64
+
+# --- Indexing Configuration ---
+faiss_index_type: "IndexFlatIP" # Inner Product for Cosine Similarity. Use IndexFlatL2 for Euclidean.
+normalize_embeddings: true # Required for IndexFlatIP to represent Cosine Similarity
+
+# --- Fine-tuning Configuration ---
+# --- Set do_finetune to true to run fine-tuning ---
+do_finetune: true
+st_model_output_path: "output/fine_tuned_scibert" # Where to save the fine-tuned model
+st_batch_size: 16
+st_num_epochs: 5
+st_learning_rate: 2.0e-5
+st_loss: "MultipleNegativesRankingLoss" # MultipleNegativesRankingLoss / TripletLoss
+st_warmup_steps: 100
+st_train_samples_max: -1 # Set to > 0 for quick testing, -1 for all data
+
+# --- TripletLoss Strategy (if st_loss == TripletLoss) ---
+triplet_margin: 0.5 # Margin for TripletLoss
+
+# --- Retrieval Configuration ---
+top_k: 100
+
+# --- Evaluation Configuration ---
+# --- List of snapshot IDs to simulate evaluation on ---
+evaluation_snapshots: ["2024-11"]
+eval_metrics: ["ndcg@10", "map@100", "recall@100"]
