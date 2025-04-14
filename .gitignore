@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+/2_Representation_Learning/output
+.idea
 # C extensions
 *.so
 *.zip
