@@ -20,7 +20,6 @@ class BM25RankRetriever:
         logging.info(f"Initialized BM25RankRetriever (k1={k1}, b={b})")
         logging.info(f"Using token cache file: {self.token_cache_file}")
 
-
     def _tokenize_and_cache_chunks(self, doc_iterator, chunk_size, cache_file):
         logging.info(f"Tokenizing documents in chunks of {chunk_size} and caching to {cache_file}...")
         os.makedirs(os.path.dirname(cache_file), exist_ok=True)
@@ -180,7 +179,6 @@ class BM25RankRetriever:
              if 'corpus_tokens' in locals(): del corpus_tokens
              gc.collect()
              return False
-
 
     def search(self, query_text, k):
         if self.bm25 is None or self.corpus_ids is None:

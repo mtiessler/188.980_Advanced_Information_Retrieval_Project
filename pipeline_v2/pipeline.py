@@ -107,7 +107,6 @@ class RetrievalPipeline:
             index_built = self.bm25_rank_retriever.load_or_build_index(
                  _doc_iterator_factory, # Pass the function itself
                  chunk_size=config.BM25_TOKEN_CHUNK_SIZE,
-                 # Pass the cache file determined by the retriever itself
                  cache_file=self.bm25_rank_retriever.token_cache_file
             )
 
@@ -147,7 +146,7 @@ class RetrievalPipeline:
 
             dataset_id = os.path.basename(config.BASE_DIR)
             model_id = config.EMBEDDING_MODEL_NAME.replace('/', '_')
-            demo_suffix = "_demo" if config.IS_DEMO_MODE else "" # Add demo suffix to FAISS cache too
+            demo_suffix = "_demo" if config.IS_DEMO_MODE else ""
             limit_suffix = f"_limit{getattr(config, 'DEMO_FILES_LIMIT', 1)}" if config.IS_DEMO_MODE else ""
             index_path = os.path.join(config.CACHE_DIR, f"faiss_{dataset_id}{demo_suffix}{limit_suffix}_{model_id}.index")
             doc_id_map_path = os.path.join(config.CACHE_DIR, f"faiss_doc_ids_{dataset_id}{demo_suffix}{limit_suffix}_{model_id}.txt")
@@ -200,7 +199,6 @@ class RetrievalPipeline:
 
 
     def generate_doc_embeddings(self, force_regenerate=config.FORCE_REGENERATE_EMBEDDINGS):
-        # Add demo suffix to embedding cache filenames
         dataset_id = os.path.basename(config.BASE_DIR)
         model_id = config.EMBEDDING_MODEL_NAME.replace('/', '_')
         demo_suffix = "_demo" if config.IS_DEMO_MODE else ""
@@ -230,16 +228,13 @@ class RetrievalPipeline:
                     return True
                 else:
                     logging.warning(f"Cached document IDs/count ({len(loaded_ids)}) do not match current expected IDs/count ({len(self.doc_ids_in_order)}). Regenerating embeddings.")
-                    # Fall through to generate new ones
             except Exception as e:
                 logging.warning(f"Could not load cached embeddings ({e}). Regenerating.")
-                # Fall through to generate new ones
 
         logging.info("Generating document embeddings...")
         if not self.setup_bert_embedder(): return False
         if self.preprocessor is None: self.setup_preprocessing()
 
-        # self.doc_ids_in_order is now correctly sized based on demo/full mode from load_data
         if not self.doc_ids_in_order:
              logging.error("doc_ids_in_order is empty. Cannot generate document embeddings.")
              return False

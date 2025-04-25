@@ -29,7 +29,7 @@ if __name__ == "__main__":
         # --- Run Pipeline 1: Traditional IR (BM25 rank_bm25 Cache) ---
         bm25_rank_run, bm25_rank_system_name = pipeline.run_bm25_rank() # Call the new rank_bm25 run method
         pipeline.run_evaluation(bm25_rank_run, bm25_rank_system_name)
-
+        '''
         # --- Run Pipeline 2: Representation Learning (BERT Dense) ---
         bert_dense_run, bert_dense_system_name = pipeline.run_bert_dense()
         pipeline.run_evaluation(bert_dense_run, bert_dense_system_name)
@@ -37,6 +37,7 @@ if __name__ == "__main__":
         # --- Run Pipeline 3: Neural Re-ranking (Hybrid) ---
         hybrid_run, hybrid_system_name = pipeline.run_hybrid_rerank()
         pipeline.run_evaluation(hybrid_run, hybrid_system_name)
+        '''
 
     except Exception as e:
         logging.error(f"An error occurred during pipeline execution: {e}", exc_info=True)
