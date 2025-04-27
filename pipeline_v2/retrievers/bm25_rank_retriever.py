@@ -5,7 +5,7 @@ import gc
 import pickle
 from rank_bm25 import BM25Okapi
 from tqdm.auto import tqdm
-from .. import config
+import config
 class BM25RankRetriever:
     def __init__(self, preprocessor, k1=1.5, b=0.75):
         self.preprocessor = preprocessor
