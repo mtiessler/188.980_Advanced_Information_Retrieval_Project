@@ -30,7 +30,7 @@ BM25_TOKEN_CACHE_FILE = os.path.join(CACHE_DIR, f"bm25_tokens_cache_{os.path.bas
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # --- Model Names (we need to explore alternatives) ---
-EMBEDDING_MODEL_NAME = 'sentence-transformers/all-MiniLM-L6-v2'
+EMBEDDING_MODEL_NAME = 'allenai/specter2'
 CROSS_ENCODER_MODEL_NAME = 'cross-encoder/ms-marco-MiniLM-L-6-v2'
 
 # --- Preprocessing ---
@@ -55,5 +55,4 @@ FINAL_TOP_K = 100
 EVALUATION_MEASURE = "nDCG@10"
 
 # --- Data Loading ---
-
 CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fulltext')

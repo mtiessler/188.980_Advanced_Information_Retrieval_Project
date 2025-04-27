@@ -136,7 +136,7 @@ def load_documents_structure(doc_dir, content_field=config.CONTENT_FIELD):
                         title = doc.get('title', '') or ""
                         abstract = doc.get('abstract', '') or ""
                         main_content = doc.get(content_field) or None
-
+                        # TODO if content_field = abstract -> don't load content_field
                         documents[doc_id] = {
                             'id': doc_id,
                             'title': title,

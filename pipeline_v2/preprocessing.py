@@ -15,15 +15,13 @@ try:
 except LookupError:
     logging.info("Downloading NLTK 'stopwords'...")
     nltk.download('stopwords', quiet=True)
-# --- Added Block ---
+
 try:
-    # PunktTokenizer seems to sometimes need this implicitly
     nltk.data.find('tokenizers/punkt_tab')
     logging.info("NLTK 'punkt_tab' resource already available.")
 except LookupError:
     logging.info("Downloading NLTK 'punkt_tab' resource...")
     nltk.download('punkt_tab', quiet=True)
-# --- End Added Block ---
 
 import Stemmer
 from nltk.corpus import stopwords
