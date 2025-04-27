@@ -47,13 +47,18 @@ class Preprocessor:
             return ""
         text = text.lower()
         text = text.translate(self.punctuation_table)
-        text = re.sub(r'\s+', ' ', text).strip()
+        # text = re.sub(r'\W+', ' ', text) # no improvement
+        # text = re.sub(r'\d+', '', text)  # Remove all digits -> don't do that.
+        text = re.sub(r'\b\d+\b', '', text)  # Remove stand alone digits
+        text = re.sub(r'\b\w{1}\b', '', text)  # Remove single characters
+        text = re.sub(r'\s+', ' ', text).strip()    # Remove extra spaces
         return text
 
     def tokenize_and_process(self, text):
         if not text:
             return []
         try:
+            text = self.clean_text(text)
             tokens = word_tokenize(text)
         except Exception as e:
             logging.error(f"Error during word_tokenize for text snippet '{text[:50]}...': {e}")
