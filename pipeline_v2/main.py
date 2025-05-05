@@ -12,7 +12,6 @@ import os
 logging.info("Starting Main Execution")
 logging.info(f"Current Working Directory: {os.getcwd()}")
 logging.info(f"Using device: {config.DEVICE}")
-logging.info(f"Embedding Model: {config.EMBEDDING_MODEL_NAME}")
 logging.info(f"Cross-Encoder Model: {config.CROSS_ENCODER_MODEL_NAME}")
 logging.info(f"DEMO MODE ACTIVE: {config.IS_DEMO_MODE}")
 if config.IS_DEMO_MODE:
@@ -26,15 +25,15 @@ if __name__ == "__main__":
         pipeline.load_data()
         pipeline.setup_preprocessing()
 
-        # --- Run Pipeline 1: Traditional IR (BM25 rank_bm25 Cache) ---
-        bm25_rank_run, bm25_rank_system_name = pipeline.run_bm25_rank() # Call the new rank_bm25 run method
+        # --- Run Pipeline 1: Traditional IR (BM25) ---
+        bm25_rank_run, bm25_rank_system_name = pipeline.run_bm25_rank()
         pipeline.run_evaluation(bm25_rank_run, bm25_rank_system_name)
 
-        # --- Run Pipeline 2: Representation Learning (BERT Dense) ---
+        # --- Run Pipeline 2: Representation Learning (MS-MARCO) ---
         bert_dense_run, bert_dense_system_name = pipeline.run_bert_dense()
         pipeline.run_evaluation(bert_dense_run, bert_dense_system_name)
 
-        # --- Run Pipeline 3: Neural Re-ranking (Hybrid) ---
+        # --- Run Pipeline 3: Neural Re-ranking (BM25 + MS-MARCO) ---
         hybrid_run, hybrid_system_name = pipeline.run_hybrid_rerank()
         pipeline.run_evaluation(hybrid_run, hybrid_system_name)
 
