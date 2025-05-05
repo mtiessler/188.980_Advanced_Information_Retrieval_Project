@@ -5,22 +5,20 @@ import gc
 import pickle
 from rank_bm25 import BM25Okapi
 from tqdm.auto import tqdm
-import config
+
 class BM25RankRetriever:
-    def __init__(self, preprocessor, k1=1.5, b=0.75):
+    def __init__(self, preprocessor, token_cache_file, k1=1.5, b=0.75):
         self.preprocessor = preprocessor
         self.k1 = k1
         self.b = b
         self.bm25 = None
         self.corpus_ids = None
-        demo_suffix = "_demo" if config.IS_DEMO_MODE else "" # demo cache :)
-        limit_suffix = f"_limit{getattr(config, 'DEMO_FILES_LIMIT', 1)}" if config.IS_DEMO_MODE else ""
-        base_id = os.path.basename(config.BASE_DIR)
-        self.token_cache_file = os.path.join(config.CACHE_DIR, f"bm25_tokens_{base_id}{demo_suffix}{limit_suffix}.pkl")
+        self.token_cache_file = token_cache_file
         logging.info(f"Initialized BM25RankRetriever (k1={k1}, b={b})")
         logging.info(f"Using token cache file: {self.token_cache_file}")
 
-    def _tokenize_and_cache_chunks(self, doc_iterator, chunk_size, cache_file):
+    def _tokenize_and_cache_chunks(self, doc_iterator, chunk_size):
+        cache_file = self.token_cache_file
         logging.info(f"Tokenizing documents in chunks of {chunk_size} and caching to {cache_file}...")
         os.makedirs(os.path.dirname(cache_file), exist_ok=True)
         processed_doc_ids = []
@@ -31,7 +29,7 @@ class BM25RankRetriever:
 
         with open(cache_file, 'wb') as f_cache:
             for doc_dict in tqdm(doc_iterator, desc="Tokenizing & Caching Chunks"):
-                if doc_dict and 'id' in doc_dict and 'text' in doc_dict and doc_dict['text']:
+                if doc_dict and isinstance(doc_dict, dict) and 'id' in doc_dict and 'text' in doc_dict and isinstance(doc_dict['text'], str) and doc_dict['text']:
                     doc_id = doc_dict['id']
                     text = doc_dict['text']
                     tokens = self.preprocessor.tokenize_and_process(text)
@@ -67,7 +65,9 @@ class BM25RankRetriever:
 
         return processed_doc_ids, cache_file
 
-    def _load_tokens_from_cache(self, cache_file):
+
+    def _load_tokens_from_cache(self):
+        cache_file = self.token_cache_file
         logging.info(f"Loading all tokens from cache file: {cache_file}")
         all_tokens = []
         try:
@@ -75,17 +75,25 @@ class BM25RankRetriever:
                 while True:
                     try:
                         chunk = pickle.load(f_cache)
-                        all_tokens.extend(chunk)
+                        if isinstance(chunk, list):
+                            all_tokens.extend(chunk)
+                        else:
+                            logging.warning(f"Read unexpected data type from cache: {type(chunk)}")
                     except EOFError:
                         break
             logging.info(f"Loaded {len(all_tokens)} token lists from cache.")
             return all_tokens
+        except FileNotFoundError:
+             logging.error(f"Token cache file not found: {cache_file}")
+             return None
         except Exception as e:
             logging.error(f"Error loading tokens from cache {cache_file}: {e}", exc_info=True)
             return None
 
-    def index(self, doc_iterator_factory, chunk_size, cache_file, force_retokenize=False):
+    def index(self, doc_iterator_factory, chunk_size, force_retokenize=False):
         logging.info("Starting BM25 (rank_bm25) indexing...")
+        cache_file = self.token_cache_file
+
         if self.bm25 is not None and not force_retokenize:
              logging.warning("Index already exists. Set force_retokenize=True to re-index.")
              return True
@@ -105,7 +113,7 @@ class BM25RankRetriever:
              logging.info("No token cache found. Tokenizing and caching documents...")
              doc_iterator_for_tokenization = doc_iterator_factory()
              processed_doc_ids, used_cache_file = self._tokenize_and_cache_chunks(
-                 doc_iterator_for_tokenization, chunk_size, cache_file
+                 doc_iterator_for_tokenization, chunk_size
              )
              if processed_doc_ids is None:
                   return False
@@ -113,13 +121,13 @@ class BM25RankRetriever:
              gc.collect()
         else:
              logging.info("Token cache file found. Re-gathering IDs to match cache order...")
-             # Get a fresh iterator from the factory for ID gathering
              id_iterator = doc_iterator_factory()
              processed_doc_ids = []
              for doc_dict in tqdm(id_iterator, desc="Re-gathering IDs for cache"):
                  if doc_dict and 'id' in doc_dict:
                       processed_doc_ids.append(doc_dict['id'])
-             logging.info(f"Re-gathered {len(processed_doc_ids)} IDs to match existing token cache.")
+             logging.info(f"Re-gathered {len(processed_doc_ids)} IDs to match existing "
+                          f"token cache.")
              del id_iterator
              gc.collect()
 
@@ -132,7 +140,7 @@ class BM25RankRetriever:
              return False
 
         logging.info("Loading tokens into memory for BM25Okapi...")
-        corpus_tokens = self._load_tokens_from_cache(used_cache_file)
+        corpus_tokens = self._load_tokens_from_cache()
 
         if corpus_tokens is None:
              logging.error("Failed to load tokens from cache.")
@@ -166,7 +174,7 @@ class BM25RankRetriever:
              gc.collect()
              return True
         except MemoryError:
-             logging.error("MemoryError occurred during BM25Okapi initialization. Token list likely too large for RAM.", exc_info=True)
+             logging.error("MemoryError occurred during BM25Okapi initialization.", exc_info=True)
              self.bm25 = None
              self.corpus_ids = None
              if 'corpus_tokens' in locals(): del corpus_tokens
@@ -206,6 +214,7 @@ class BM25RankRetriever:
             logging.error(f"Error during rank_bm25 search for query '{query_text[:50]}...': {e}", exc_info=True)
             return {}
 
-    def load_or_build_index(self, doc_iterator_factory, chunk_size, cache_file):
+    def load_or_build_index(self, doc_iterator_factory, chunk_size):
          logging.info("Attempting to build/load rank_bm25 index...")
-         return self.index(doc_iterator_factory, chunk_size, cache_file, force_retokenize=False)
+         return self.index(doc_iterator_factory, chunk_size, force_retokenize=False)
+
