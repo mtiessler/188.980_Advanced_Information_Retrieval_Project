@@ -5,13 +5,16 @@ import os
 IS_DEMO_MODE = False # Set to False FOR FULL RUN
 DEMO_FILES_LIMIT = 1 # Ignored when IS_DEMO_MODE is False
 
-# --- Drive Path (For Colab) ---
+# --- Paths (For Colab) ---
 # DRIVE_PROJECT_ROOT = "/content/drive/MyDrive/AIR_Project"
 
 # --- Paths (For Jupyter Hub) ---
 DRIVE_PROJECT_ROOT = "/home/jovyan/AIR/188.980_Advanced_Information_Retrieval_Project"
 DRIVE_PROJECT_ROOT_DATASET = "/home/jovyan/shared/188.980-AIR-2025S/LongEval-Sci"
 
+# -- Paths (For Local) ---
+# DRIVE_PROJECT_ROOT = ""
+# DRIVE_PROJECT_ROOT_DATASET = "../LongEval-Sci"
 # --- Core Paths ---
 BASE_DIR = os.path.join(DRIVE_PROJECT_ROOT_DATASET, "longeval_sci_training_2025_abstract")
 PROJECT_CODE_DIR = os.path.join(DRIVE_PROJECT_ROOT, "pipeline_v2")
@@ -30,7 +33,6 @@ BM25_TOKEN_CACHE_FILE = os.path.join(CACHE_DIR, f"bm25_tokens_cache_{os.path.bas
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # --- Model Names (we need to explore alternatives) ---
-EMBEDDING_MODEL_NAME = 'allenai/specter2'
 CROSS_ENCODER_MODEL_NAME = 'cross-encoder/ms-marco-MiniLM-L-6-v2'
 
 # --- Preprocessing ---
@@ -38,21 +40,13 @@ REMOVE_STOPWORDS = True
 ENABLE_STEMMING = True
 
 # --- BM25 Parameters ---
-BM25_K1 = 1.2 # 1.2-1.9
-BM25_B = 0.7
+BM25_K1 = 0.95
+BM25_B = 0.75
 BM25_TOP_K = 1000
 
-# --- Dense Retrieval / FAISS ---
-EMBEDDING_BATCH_SIZE = 64 # Adjust based on Colab GPU memory if needed
-FAISS_TOP_K = 1000 # Candidates for re-ranking
-FORCE_REGENERATE_EMBEDDINGS = False # Set to True if you want to force regeneration even if cache exists for the full run
-
-# --- Re-ranking ---
 RERANK_BATCH_SIZE = 32
 FINAL_TOP_K = 100
 
-# --- Evaluation ---
-EVALUATION_MEASURE = "nDCG@10"
+EVALUATION_MEASURES = {"nDCG@10", "MAP@100", "MRR@10"}
 
-# --- Data Loading ---
 CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fulltext')
