@@ -52,4 +52,4 @@ FINAL_TOP_K = 100
 
 EVALUATION_MEASURES = {"nDCG@10", "MAP@100", "MRR@10"}
 
-CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fulltext')
+CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fullText')
