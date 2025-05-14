@@ -26,7 +26,7 @@ QUERIES_FILE = os.path.join(BASE_DIR, "queries.txt")
 QRELS_FILE = os.path.join(BASE_DIR, "qrels.txt")
 
 # --- Added for rank_bm25 token caching ---
-BM25_TOKEN_CHUNK_SIZE = 50000
+BM25_TOKEN_CHUNK_SIZE = 50000 #-> 5000  
 BM25_TOKEN_CACHE_FILE = os.path.join(CACHE_DIR, f"bm25_tokens_cache_{os.path.basename(BASE_DIR)}.pkl")
 
 # --- Device ---

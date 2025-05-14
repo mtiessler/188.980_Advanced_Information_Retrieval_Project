@@ -6,7 +6,7 @@ import ir_measures
 import config
 import gc
 
-def stream_document_dicts(doc_dir, content_field='fulltext'):
+def stream_document_dicts(doc_dir, content_field='fullText'):
     logging.info(f"Streaming documents from: {doc_dir} using field '{content_field}'")
     doc_files_all = [f for f in os.listdir(doc_dir) if f.endswith('.jsonl')]
 
