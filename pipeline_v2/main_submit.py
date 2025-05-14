@@ -34,7 +34,6 @@ def prepare_submission_run_file(output_dir, sub_folder, run_file_prefix, must_co
         os.path.join(output_dir, f)
         for f in all_files
         if f.startswith(run_file_prefix) and f.endswith(".txt") and (must_contain is None or must_contain in f) 
-            and not_contain not in f
     ]
     if len(run_files) != 1:
         raise RuntimeError(f"Expected exactly one run file, found {len(run_files)}: {run_files}")
