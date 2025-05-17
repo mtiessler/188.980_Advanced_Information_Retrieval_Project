@@ -1,0 +1,55 @@
+
+tag: BM25_ColBERTv2_ReRanker_v1
+
+actor:
+  team: academy retrievals
+
+research goal:
+  description: |
+    This system implements a two-stage retrieval pipeline for scientific document search.
+    The first stage uses BM25 to retrieve an initial set of candidate documents from the
+    provided collection. The BM25 implementation utilizes NLTK for tokenization,
+    stopwords removal, and Porter stemming.
+    The second stage employs a pre-trained ColBERTv2.0 model, accessed via the
+    RAGatouille library, to re-rank the top candidates retrieved by BM25.
+    The final ranked list is based on the ColBERT re-ranking scores.
+
+platform:
+  software:
+    libraries:
+      - python 3.x
+      - ragatouille
+      - rank_bm25
+      - torch
+      - nltk
+      - tqdm
+      - ir_measures (for potential local evaluation, not directly in submission pipeline)
+
+data:
+  training data:
+    - name: longeval_sci_testing_2025_abstract (documents used to build BM25 index on-the-fly)
+    - name: Pre-trained colbert-ir/colbertv2.0 (no fine-tuning on task-specific data in this script)
+
+method:
+  automatic: true
+
+  indexing:
+    tokenizer: nltk.word_tokenize (with lowercasing and punctuation removal)
+    stemmer: PorterStemmer (nltk.stem.PorterStemmer)
+    stopwords: English stopwords (nltk.corpus.stopwords)
+
+  retrieval:
+    - # First stage: BM25
+      name: BM25
+      lexical: yes
+      deep_neural_model: no
+      sparse_neural_model: no
+      dense_neural_model: no
+      single_stage_retrieval: no # It's the first stage of a multi-stage pipeline
+
+      name: ColBERTv2.0 Re-ranker (via RAGatouille)
+      lexical: no # Primarily semantic
+      deep_neural_model: yes
+      sparse_neural_model: no # ColBERT is generally considered dense, though it has sparse interactions (MaxSim)
+      dense_neural_model: yes
+      single_stage_retrieval: no # It's a re-ranking stage
