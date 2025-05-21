@@ -1,6 +1,6 @@
 import logging
 logging.basicConfig(
-    filename="main_run.log",
+    filename="BM25_main_submit_run.log",
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - [%(module)s] - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
@@ -13,23 +13,40 @@ import shutil
 import gzip
 logging.info("Starting Main Execution")
 logging.info(f"Current Working Directory: {os.getcwd()}")
-logging.info(f"Using device: {config.DEVICE}")
-logging.info(f"Cross-Encoder Model: {config.CROSS_ENCODER_MODEL_NAME}")
+#logging.info(f"Using device: {config.DEVICE}")
 logging.info(f"DEMO MODE ACTIVE: {config.IS_DEMO_MODE}")
 if config.IS_DEMO_MODE:
     logging.info(f"Processing max {getattr(config, 'DEMO_FILES_LIMIT', 1)} document file(s).")
 
-# copy metadate-file into submission folder
 def prepare_submission_root(submission_root):
+    """
+    Create the submission root directory and copy the metadata file into it.
+
+    Args:
+        submission_root (str): Path to the root submission directory.
+
+    Returns:
+        None
+    """    
     os.makedirs(submission_root, exist_ok=True)
     shutil.copy("ir-metadata.yml", submission_root)
 
-
-# copies run files into right submission folder
-#renames to run.txt, compresses to run.txt.gz, and removes all intermediate files except run.txt.gz.
 def prepare_submission_run_file(output_dir, sub_folder, run_file_prefix, must_contain=None):
+    """
+    Copy the run file into the correct submission folder, 
+    rename to run.txt, compress to run.txt.gz
+    and remove all intermediate files except the compressed file.
+
+    Args:
+        output_dir (str): Directory where run files are located.
+        sub_folder (str): Submission subfolder to copy files into.
+        run_file_prefix (str): Prefix of the run file to look for.
+        must_contain (str, optional): Additional string that must be in the filename.
+
+    """
     os.makedirs(sub_folder, exist_ok=True)
     all_files = os.listdir(output_dir)
+    # Find run files matching the prefix and optional substring
     run_files = [
         os.path.join(output_dir, f)
         for f in all_files
@@ -61,73 +78,36 @@ if __name__ == "__main__":
 
     try:
         # --- Prepare Submission Folders ---
-        # For BM25
+        # For BM25: create root submission directory and copy metadata
         bm25_root = os.path.join(config.OUTPUT_DIR_SUBMISSON, "Submission_BM25")
         prepare_submission_root(bm25_root)
 
-        # For BERT
-        bert_root = os.path.join(config.OUTPUT_DIR_SUBMISSON, "Submission_BERT")
-        prepare_submission_root(bert_root)
-
-        # For RERANK
-        rerank_root = os.path.join(config.OUTPUT_DIR_SUBMISSON, "Submission_RERANK")
-        prepare_submission_root(rerank_root)
-
         #############################################################
-        #############################################################
-
-        # --- Run Pipeline ---
-        # --- Time T1 2024-11 ---
+        # --- Run Pipeline for Time T1 2024-11 ---
         config.QUERIES_FILE = config.QUERIES_FILE_SUBMISSON_T1
         print(config.QUERIES_FILE)
 
-        pipeline.load_data()
-        pipeline.setup_preprocessing()
+        pipeline.load_data()            # Load documents, queries, and qrels
+        pipeline.setup_preprocessing()  # Initialize the preprocessor
 
-        # --- Run Traditional IR (BM25) ---
+        # --- Run BM25 and save run file for T1 ---
         bm25_rank_run, bm25_rank_system_name = pipeline.run_bm25_rank()
         sub_folder = os.path.join(bm25_root, "2024-11")
         prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BM25_")
 
-        '''
-        # --- Run Pipeline 2: Representation Learning (MS-MARCO) ---
-        bert_dense_run, bert_dense_system_name = pipeline.run_bert_dense()
-        sub_folder = os.path.join(bert_root, "2024-11")
-        prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BERT_")
-
-        # --- Run Pipeline 3: Neural Re-ranking (BM25 + MS-MARCO) ---
-        hybrid_run, hybrid_system_name = pipeline.run_hybrid_rerank()
-        sub_folder = os.path.join(rerank_root, "2024-11")
-        prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BM25_", must_contain="_then_")
-        '''
-       #############################################################
-
-        # --- Time T2 2025-01 ---
-        # --- Run Pipeline 1: Traditional IR (BM25) ---
+        #############################################################
+        # --- Run Pipeline for Time T2 2025-01 ---
         config.QUERIES_FILE = config.QUERIES_FILE_SUBMISSON_T2
         print(config.QUERIES_FILE)
 
         pipeline.load_data()
         pipeline.setup_preprocessing()
 
-        # --- Run Traditional IR (BM25) ---
+        # --- Run BM25 and save run file for T2 ---
         bm25_rank_run, bm25_rank_system_name = pipeline.run_bm25_rank()
         #sub_folder = os.path.join(config.OUTPUT_DIR_SUBMISSON, "Submission_BM25", "2025-01")
         sub_folder = os.path.join(bm25_root, "2025-01")
         prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BM25_")
-
-        '''
-        # --- Run Pipeline 2: Representation Learning (MS-MARCO) ---
-        bert_dense_run, bert_dense_system_name = pipeline.run_bert_dense()
-        sub_folder = os.path.join(bert_root, "2025-01")
-        prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BERT_")
-
-        # --- Run Pipeline 3: Neural Re-ranking (BM25 + MS-MARCO) ---
-        hybrid_run, hybrid_system_name = pipeline.run_hybrid_rerank()
-        sub_folder = os.path.join(rerank_root, "2025-01")
-        prepare_submission_run_file(config.OUTPUT_DIR, sub_folder, "run_BM25_", must_contain="_then_")
-        '''
-
 
     except Exception as e:
         logging.error(f"An error occurred during pipeline execution: {e}", exc_info=True)
