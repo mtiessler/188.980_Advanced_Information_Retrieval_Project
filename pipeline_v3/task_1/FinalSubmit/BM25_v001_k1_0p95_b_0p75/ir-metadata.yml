@@ -1,0 +1,87 @@
+# We use the ir-metadata standard to describe and process runs.
+# The fields below are mandatory, you can add additional metadata if you like.
+# There are two libraries that automate and simplify tracking of experimental metadata that you can use optionally:
+#
+#   - The metadata module of [repro_eval](https://www.ir-metadata.org/software/):
+#     Tracks the platform and implementation of your experiments.
+#
+#   - The [tirex_tracker](https://github.com/tira-io/tirex-tracker/):
+#     Tracks the platform, implementation, and resources (e.g., CPU, GPU, RAM, emissions, etc.) of your experiments.
+#
+# See https://www.ir-metadata.org for more details.
+
+tag: BM25_k1_0p95_b_0p75_stop_stem_fullText
+
+actor:
+  # The name of the team
+  team: clef25_academy_retrievals
+
+# Please provide a short description of your system.
+research goal:
+  description: |
+    This is a basic BM25 retrieval system for the Longeval-Sci task.
+    The BM25 implementation utilizes NLTK for tokenization, stopwords removal, and stemming.
+
+implementation:
+  source:
+    # Please provide a reference to your code if possible.
+    # If you can not share your code, you can delete the implementation section.
+    # The repro_eval and/or tirex_tracker tools can track this automatically, including commits, branches, etc.
+    repository: no reference to code available
+
+platform:
+  software:
+  
+    # Which software and tools did you use for training, tunning and running your system?
+    # You can maintain the software that you used manually.
+    # Alternatively, you can use repro_eval or the tirex_tracker to track this.
+    libraries:
+      - python 3.x
+      - numpy
+      - pandas
+      - ragatouille
+      - rank_bm25
+      - torch
+      - nltk
+      - tqdm
+      - PyStemmer
+      - tira
+      - ir_measures (for potential local evaluation, not directly in submission pipeline)
+
+data:
+  # Please describe which training data your system used, e.g., longeval-sci, longeval-web, MS MARCO, etc.
+  training data:
+    - name: longeval-sci
+
+method:
+  # Boolean value indicating if it is a automatic (true) or manual (false) run
+  automatic: false
+
+  indexing:
+    tokenizer: nltk.tokenize.word_tokenize
+    stemmer: PyStemmer (English Snowball)
+    stopwords: nltk.corpus.stopwords.words('english')
+
+  retrieval:
+    - # Which ranking approach do you use? E.g., bm25
+      name: bm25
+
+      ##################################################
+      # Yes/No Questions
+      ##################################################
+
+      # Did you use any statistical ranking model? (yes/no)
+      lexical: yes
+
+      # Did you use any deep neural network model? (yes/no)
+      deep_neural_model: no
+
+      # Did you use a sparse neural model? (yes/no):
+      sparse_neural_model: no
+
+      # Did you use a dense neural model? (yes/no):
+      dense_neural_model: no
+
+      # Did you use more than a single retrieval model? (yes/no):
+      single_stage_retrieval: yes
+
