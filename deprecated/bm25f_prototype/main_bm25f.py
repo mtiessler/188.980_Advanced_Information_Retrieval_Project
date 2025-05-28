@@ -1,7 +1,7 @@
 import logging
 
 from pipeline_v2 import config
-from pipeline_v2.deprecated.bm25f_prototype.pipeline_bm25f import RetrievalPipeline
+from pipeline_v2.bm25f_prototype.pipeline_bm25f import RetrievalPipeline
 
 logging.basicConfig(
     filename="main_run.log",

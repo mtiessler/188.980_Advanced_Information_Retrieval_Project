@@ -1,14 +1,12 @@
 import logging
 import time
 import os
-import numpy as np
 from collections import defaultdict
 from tqdm.auto import tqdm
 import gc
-import torch
 
 from pipeline_v2 import config, data_loader, utils
-from pipeline_v2.deprecated.bm25f_prototype.pyterrier_rank_retriever import PyTerrierRankRetriever
+from pipeline_v2.bm25f_prototype.pyterrier_rank_retriever import PyTerrierRankRetriever
 from pipeline_v2.evaluation import evaluate_run
 from pipeline_v2.preprocessing import Preprocessor
 from pipeline_v2.rerankers import BertReranker
