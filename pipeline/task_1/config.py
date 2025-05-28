@@ -29,7 +29,7 @@ BASE_DIR = os.path.join(DRIVE_PROJECT_ROOT_DATASET, "longeval_sci_training_2025_
 #BASE_DIR = os.path.join(DRIVE_PROJECT_ROOT_DATASET, "longeval_sci_testing_2025_abstract")
 #BASE_DIR = os.path.join(DRIVE_PROJECT_ROOT_DATASET, "longeval_sci_testing_2025_fulltext")
 
-PROJECT_CODE_DIR = os.path.join(DRIVE_PROJECT_ROOT, "pipeline_v3/task_1")
+PROJECT_CODE_DIR = os.path.join(DRIVE_PROJECT_ROOT, "pipeline/task_1")
 OUTPUT_DIR = os.path.join(PROJECT_CODE_DIR, "longeval_runs")
 CACHE_DIR = os.path.join(PROJECT_CODE_DIR, "cache")
 
