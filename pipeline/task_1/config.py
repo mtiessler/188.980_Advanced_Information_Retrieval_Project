@@ -6,7 +6,7 @@ IS_DEMO_MODE = False # Set to False FOR FULL RUN
 DEMO_FILES_LIMIT = 1 # Ignored when IS_DEMO_MODE is False
 
 # --- Paths (For Colab) ---
-# DRIVE_PROJECT_ROOT = "/content/drive/MyDrive/AIR_Project"
+#DRIVE_PROJECT_ROOT = "/content/drive/MyDrive/AIR_Project"
 
 # --- Paths (For Jupyter Hub) ---
 DRIVE_PROJECT_ROOT = "/home/jovyan/AIR/Offline_188.980_Advanced_Information_Retrieval_Project"
@@ -15,6 +15,8 @@ DRIVE_PROJECT_ROOT = "/home/jovyan/AIR/Offline_188.980_Advanced_Information_Retr
 DRIVE_PROJECT_ROOT_DATASET = "/home/jovyan/shared/188.980-AIR-2025S/LongEval-Sci"
 #for TEST Dataset
 #DRIVE_PROJECT_ROOT_DATASET = "/home/jovyan/sharedTEST/188.980-AIR-2025S/LongEval-Sci"
+#for Collab
+#DRIVE_PROJECT_ROOT_DATASET = "/content/drive/MyDrive/AIR_Project"
 
 # -- Paths (For Local) ---
 # DRIVE_PROJECT_ROOT = ""
