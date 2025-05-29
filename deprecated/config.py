@@ -52,8 +52,11 @@ DENSE_MODEL_NAME= 'cross-encoder/ms-marco-MiniLM-L12-v2' #"sebastian-hofstaetter
 DENSE_BATCH_SIZE=10
 
 # --- BM25 Parameters ---
-BM25_K1 = 0.95
-BM25_B = 0.75
+# Best results abstract-dataset: k1=1.0, b=0.7
+# Best results fulltext-dataset: k1=0.2, b=0.8
+# inital value: k1=0.95, b=0.75
+BM25_K1 = 0.2 
+BM25_B = 0.8 
 BM25_TOP_K = 1000
 
 RERANK_BATCH_SIZE = 32
