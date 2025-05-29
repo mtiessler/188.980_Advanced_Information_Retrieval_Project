@@ -7,55 +7,77 @@ This project implements and compares three different information retrieval pipel
 
 The implemented pipelines are:
 1.  **Traditional IR Model:** BM25 using the `rank_bm25` library with optimizations for memory usage (token caching).
-2.  **Representation Learning Model:** Dense retrieval using SentenceBERT embeddings (`sentence-transformers/all-MiniLM-L6-v2`) indexed and searched with FAISS.
-3.  **Neural Re-ranking Model:** A hybrid approach using BM25 and/or FAISS for initial candidate retrieval, followed by re-ranking using a pre-trained Cross-Encoder model (`cross-encoder/ms-marco-MiniLM-L-6-v2`).
+2.  **Representation Learning Model:** Dense retrieval using a fine-tuned SciBERT (`allenai/scibert_scivocab_uncased`) and a pre-trained ColBERTv2 (`colbert-ir/colbertv2.0`)
+3.  **Neural Re-ranking Model:** A hybrid two-stage re-ranking architecture, aiming to combine the strengths of lexical recall from
+BM25 with the semantic precision of ColBERTv2 (`colbert-ir/colbertv2.0`)
 
 ## Dataset
 
 This project uses the **LongEval 2025 CORE Retrieval Train Collection**. It consists of queries, scientific documents (provided in JSONL format with fields like `id`, `title`, `abstract`, and optionally `fulltext`), and relevance judgments (`qrels.txt` derived from click models).
 
-The pipeline can be configured to use either the abstract-only version or the full-text version of the documents.
 
 ## Implemented Pipelines
 
-1.  **BM25 (rank_bm25 + Caching):**
+1.  **Task1 - BM25 (rank_bm25 + Caching):**
     * Uses the `rank_bm25` library.
     * Implements NLTK-based preprocessing (tokenization, optional stopword removal, optional Snowball stemming via `PyStemmer`).
     * To handle large dataset memory constraints, it tokenizes documents in chunks, caches tokens to disk (`.pkl`), loads all tokens into memory, and then initializes the `BM25Okapi` index.
     * Performs standard BM25 search.
 
-2.  **Dense Retrieval (SentenceBERT + FAISS):**
-    * Uses `sentence-transformers/all-MiniLM-L6-v2` (or other configured model) to generate dense embeddings for documents and queries.
-    * Builds a FAISS index (`IndexFlatIP`) for efficient nearest-neighbor search based on cosine similarity (inner product on normalized vectors).
-    * Caches document embeddings (`.npy`) and the FAISS index (`.index`) for faster subsequent runs.
+2.  **Task2 - Dense Retrieval (SciBERT):**
+    * Fine-tuned as a regression-based relevance classifier using the `allenai/scibert_scivocab_uncased model`.
+    * Inputs are constructed by concatenating the query and document abstract with [SEP] tokens.
+    * Sequences are tokenized with the SciBERT tokenizer, padded/truncated to 512 tokens (BERT limit).
+    * Relevance judgments (qrels) were split 90/10 into training and evaluation sets using stratified sampling by query ID for fine-tuning
 
-3.  **Hybrid Re-ranking (BM25/FAISS + Cross-Encoder):**
+3.  **Task2 - Dense Retrieval (ColBERT):**
+    * Uses the `colbert-ir/colbertv2.0` model via the RAGatouille library for late interaction semantic retrieval.
+    * Indexes token-level embeddings of abstracts, with structured input: title [SEP] authors [SEP] abstract.
+    * Queries are independently encoded, and retrieval uses `MaxSim` token-level similarity for ranking.
+
+4.  **Task3 - Hybrid Re-ranking (BM25 + ColBERTv2):**
     * Retrieves an initial set of candidate documents using both the BM25 model (Top-K) and the FAISS index (Top-K).
     * Combines the candidate sets.
-    * Uses a pre-trained Cross-Encoder model (`cross-encoder/ms-marco-MiniLM-L-6-v2` or other configured model) to re-score the candidate query-document pairs based on deeper semantic interaction.
-    * Ranks the final results based on the Cross-Encoder scores.
+    * Uses a pre-trained model (`colbert-ir/colbertv2.0`) to re-score the candidate query-document pairs based on deeper semantic interaction.
+    * Ranks the final results based on the ColBERT scores.
 
 ## Project Structure
 
 ```
 .
-├── cache/                    # Directory for cached embeddings, indexes, tokens (auto-created)
-├── config.py               # Main configuration (paths, models, params, run mode)
-├── data_loader.py          # Functions for loading data (structure, stream, queries, qrels)
-├── evaluation.py           # Evaluation function using ir_measures
-├── longeval_runs/          # Directory for output run files (auto-created)
-├── main.py                 # Main execution script
-├── pipeline.py             # Orchestrator class (RetrievalPipeline)
-├── preprocessing.py        # Text preprocessing class (Preprocessor)
-├── requirements.txt        # Python dependencies
-├── retrievers/
-│   ├── __init__.py
-│   ├── bm25_rank_retriever.py # BM25 implementation using rank_bm25 + caching
-│   └── dense_retriever.py    # BERT Embedder and FAISS Index classes
-├── rerankers/
-│   ├── __init__.py
-│   └── bert_reranker.py      # BERT Cross-Encoder implementation
-└── utils.py                # Utility functions (e.g., saving runs)
+pipeline/
+├── task_1/               # Lexical BM25 pipeline 
+│   ├── BM25_main.py      # Main execution script for training data
+│   ├── BM25_main_submit.py # Main execution script for submission, dataset
+│   ├── data_loader.py    # Loads and preprocesses datasets
+│   ├── config.py         # Main configuration (paths, models, params, run mode)
+│   ├── evaluation.py     # Evaluation function using ir_measures
+│   ├── gridsearch_main.py# BM25 Parameter tuning gridsearch
+│   ├── preprocessing.py  # Text preprocessing class (Preprocessor)
+│   ├── pipeline.py       # Orchestrator class (RetrievalPipeline)
+│   ├── utils.py          # Utility functions
+│   ├── FinalSubmit/      # Final submissions done for BM25
+│   │   └── BM25_v001_k1_0p95_b_0p75
+│   │   ├── BM25_v002_k1_0p2_b_0p8
+│   │   └── BM25_v003_k1_1p0_b_0p7
+│   ├── longeval_runs/    # Directory for output run files (auto-created)
+│   ├── retrievers/
+│   │   ├── __init__.py
+│   │   └── bm25_rank_retriever.py        # BM25 retrieval class using rank_bm25
+│   ├── submissions/      # Directory for submission files for CLEF competition (auto-created)
+│   ├── README.md
+│   ├── requirements.txt  # Python dependencies
+│   ├── ir-metadata.yml   # YAML file template for submission
+│   │
+├── task_2/               # Neural models (SciBERT, ColBERTv2)
+│   ├── BERT_v1.ipynb     # SciBERT fine-tuning notebook
+│   ├── ColBERT_v2.ipynb  # RAGatouille-ColBERTv2 notebook
+│   │
+├── task_3/               # Hybrid: BM25 + ColBERTv2 re-ranking
+│   ├── evaluation.ipynb
+│   ├── exec_and_uploader.ipynb  # Execution for submission files
+├── __init__.py
+└── deprecated/           # Initial pipeline attempts, experiments done 
 ```
 
 ## Setup
@@ -82,7 +104,7 @@ The pipeline can be configured to use either the abstract-only version or the fu
     source env/bin/activate  # Linux/macOS
     # env\Scripts\activate  # Windows
     ```
-3.  **Install Dependencies:** Modify `requirements.txt` to include either `faiss-cpu` or `faiss-gpu` based on your hardware, then install:
+3.  **Install Dependencies for Task1:** Modify `requirements.txt` to include either `faiss-cpu` or `faiss-gpu` based on your hardware, then install:
     ```bash
     pip install -r requirements.txt
     ```
@@ -97,7 +119,7 @@ The pipeline can be configured to use either the abstract-only version or the fu
 2.  Place the dataset directory in a location accessible to the project.
 3.  **Crucially, update the paths** in `config.py` (`BASE_DIR`, etc.) to point to the correct location of the dataset directory. See Configuration section.
 
-## Configuration (`config.py`)
+## Configuration (`task_1\config.py`)
 
 This file controls all major aspects of the pipeline. Edit this file before running:
 
@@ -107,11 +129,8 @@ This file controls all major aspects of the pipeline. Edit this file before runn
 * **Paths:**
     * `DRIVE_PROJECT_ROOT`: (For Colab primarily) Set the root path on Drive where the project and data reside.
     * `BASE_DIR`: **Must** point to the root of your dataset directory (e.g., `.../longeval_sci_training_2025_abstract`).
-    * `PROJECT_CODE_DIR`: Path to the directory containing `main.py`.
+    * `PROJECT_CODE_DIR`: Path to the directory containing `BM25_main.py`.
     * `OUTPUT_DIR`, `CACHE_DIR`: Locations for saving run files and caches (indexes, embeddings). **Ensure these are writable and persistent (e.g., on Google Drive for Colab).**
-* **Models:**
-    * `EMBEDDING_MODEL_NAME`: Hugging Face model name for sentence embeddings.
-    * `CROSS_ENCODER_MODEL_NAME`: Hugging Face model name for the re-ranker.
 * **Preprocessing:**
     * `REMOVE_STOPWORDS`: `True` or `False` for BM25 preprocessing.
     * `ENABLE_STEMMING`: `True` or `False` for BM25 preprocessing (uses PyStemmer/Snowball).
@@ -120,61 +139,47 @@ This file controls all major aspects of the pipeline. Edit this file before runn
 
 ## Execution
 
-### Local Execution
+### Task 1 - Traditional IR Model
 
-1.  Ensure Prerequisites, Installation, Data Placement, and Configuration are done.
-2.  Activate your virtual environment (if used).
-3.  Navigate to the project's code directory (where `main.py` is located) in your terminal.
-4.  Run the main script:
-    ```bash
-    python main.py
-    ```
-5.  Monitor the console output for progress and logs. Expect long runtimes for the full dataset, especially during indexing and embedding generation.
+1.  Ensure Prerequisites, Installation, Data Placement, and Configuration in `task_1/config.py` are done.
+2.  Open the notebook task_1/BM25_pipline_exec.ipynb and follow additional instructions step-by-step to generate ir metrics or additionally generate TIRA submission. 
+3.  Monitor the output for progress and logs. Expect long runtimes for the full dataset, especially during preprocessing. 
 
-### Google Colab Execution
+* for some additional information see task_1\ReadMe.
 
-1.  **Upload:** Upload your **entire project code folder** and the **dataset folder** to your Google Drive (e.g., into a folder named `AIR_Project`).
-2.  **Create Notebook & Set Runtime:** Open a Colab notebook, go to `Runtime` -> `Change runtime type`, select `Python 3`, and choose a `GPU` Hardware accelerator (T4 recommended). *(Colab Pro/Pro+ highly recommended for RAM/runtime limits)*.
-3.  **Mount Drive:** Run this cell:
-    ```python
-    from google.colab import drive
-    drive.mount('/content/drive')
-    # Follow auth prompts
-    ```
-4.  **Configure Paths:** **Edit `config.py` on your Google Drive.** Update `DRIVE_PROJECT_ROOT`, `BASE_DIR`, `PROJECT_CODE_DIR`, `OUTPUT_DIR`, `CACHE_DIR` to use absolute paths starting with `/content/drive/MyDrive/...` pointing to your uploaded folders. Verify `DEVICE = "cuda"`.
-5.  **Configure Run Mode:** Edit `config.py` on Drive to set `IS_DEMO_MODE` (`True`/`False`), `REMOVE_STOPWORDS`, `ENABLE_STEMMING`, etc.
-6.  **Install Dependencies:** Run this cell:
-    ```python
-    # Change to your project code directory on Drive
-    %cd /content/drive/MyDrive/AIR_Project/pipeline_v2/
-    # Install (ensure requirements.txt lists faiss-gpu)
-    !pip install -r requirements.txt
-    ```
-7.  **Run Pipeline:** Run this cell:
-    ```python
-    # Ensure you are in the project directory (%cd ...)
-    !python main.py
-    ```
-8.  **Monitor & Wait:** Watch cell output. Be prepared for **long runtimes (hours)** for the full dataset. Keep the tab active (free tier) or rely on background execution (Pro+). Monitor RAM/GPU usage.
+### Task 2 
+
+1. Run notebook task_2/BERT_v1.ipynb for SciBERT implementation
+2. Run notebook task_2/ColBERT_v2.ipynb for ColBERTv2 implementation
+
+* All the dependencies are installed and the configurations set in the begining of the notebooks
+
+### Task 3 
+1. Run notebook task_3/evaluation.ipynb to execute model and generate ir metrics
+2. Run notebook task_3/exec_and_uploader.ipynb to execute model and generate TIRA submission
+
 
 ## Output
 
-* **Run Files:** Standard TREC-format run files (`run_BM25Rank_Baseline.txt`, `run_BERT_Dense_FAISS.txt`, `run_Hybrid_ReRank_BM25Rank.txt`) will be saved in the directory specified by `OUTPUT_DIR`.
+* **Run Files:** Standard TREC-format run files (`run_BM25.txt`, `CLEF-ColBERT-Abstract-Final-v1.txt`, `CLEF-Bert-Run-FP16.txt`, `run.txt`)
 * **Cache Files:** Intermediate files are saved in `CACHE_DIR` to speed up subsequent runs:
     * BM25 Tokens: `bm25_tokens_cache_....pkl`
-    * Document Embeddings: `doc_embeddings_....npy`, `doc_embeddings_ids_....txt`
-    * FAISS Index: `faiss_....index`, `faiss_doc_ids_....txt`
+    * ColBERT Model Cache, if used by RAGatouille: `colbert_model_cache`
 * **Logs:** Detailed execution logs are printed to the console/Colab output.
 
-## Baseline Results (Example from Logs)
+## Final Results for Abstract Dataset
 
-*(Note: These results were obtained on the abstract dataset without fine-tuning)*
+* BM25 (k1 = 1.0, b = 0.7): `nDCG@10: 0.1778`
+* Dense Retrieval - SciBERT (Fine-tuned): `nDCG@10: 0.1896`
+* Dense Retrieval - ColBERTv2 (End-to-End, RAGatouille): `nDCG@10: 0.6363`
+* Hybrid Re-rank - BM25 (k1 = 1.5, b = 0.75) + ColBERTv2 Re-ranker: `nDCG@10: 0.1316`
 
-* BM25 (rank_bm25): `nDCG@10: 0.1474`
-* Dense Retrieval (all-MiniLM-L6-v2): `nDCG@10: 0.0483`
-* Hybrid Re-rank (ms-marco-MiniLM-L-6-v2): `nDCG@10: 0.1325`
-
-These results highlight the effectiveness of the traditional BM25 baseline and the challenge of applying general-purpose neural models zero-shot to this domain.
+## Group members contribution:
+* Adrian Bergler: Supported BM25 hyperparameter tuning; Experimented with BM25F and the integration of the developed BM25 into Hybrid Re-ranking; Report
+* Christine Hubinger: Lead BM25 implementation (Task1), preprocessing pipeline, and grid search tuning; TIRA submission setup; groupmeeting organization; Report
+* Dmytro Pashchenko: Report and documentation
+* Margarida Maria Agostinho Gonçalves: Experimented with initial dense retrieval; Report
+* Max Tiessler: Developed and trained SciBERT (Task2); Implemented Hybrid Re-ranking (Task3: BM25 + ColBERT); Developed initial pipeline set-up; TIRA submission setup; Report
 
 ## Course Context
 
