@@ -47,6 +47,10 @@ CROSS_ENCODER_MODEL_NAME = 'cross-encoder/ms-marco-MiniLM-L-6-v2'
 REMOVE_STOPWORDS = True
 ENABLE_STEMMING = True
 
+# --- BERT Parameters ---
+DENSE_MODEL_NAME= 'cross-encoder/ms-marco-MiniLM-L12-v2' #"sebastian-hofstaetter/distilbert-dot-margin_mse-T2-msmarco"
+DENSE_BATCH_SIZE=10
+
 # --- BM25 Parameters ---
 # Best results abstract-dataset: k1=1.0, b=0.7
 # Best results fulltext-dataset: k1=0.2, b=0.8
@@ -60,4 +64,4 @@ FINAL_TOP_K = 100
 
 EVALUATION_MEASURES = {"nDCG@10", "MAP@100", "MRR@10"}
 
-CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fullText')
+CONTENT_FIELD = 'abstract' # Select field for document text ('abstract' or 'fulltext')
