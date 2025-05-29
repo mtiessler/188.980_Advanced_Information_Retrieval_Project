@@ -119,7 +119,7 @@ pipeline/
 2.  Place the dataset directory in a location accessible to the project.
 3.  **Crucially, update the paths** in `config.py` (`BASE_DIR`, etc.) to point to the correct location of the dataset directory. See Configuration section.
 
-## Configuration (`config.py`)
+## Configuration (`task_1\config.py`)
 
 This file controls all major aspects of the pipeline. Edit this file before running:
 
@@ -140,42 +140,12 @@ This file controls all major aspects of the pipeline. Edit this file before runn
 ## Execution
 
 ### Task 1 - Traditional IR Model
-#### Local Execution
 
-1.  Ensure Prerequisites, Installation, Data Placement, and Configuration are done.
-2.  Activate your virtual environment (if used).
-3.  Navigate to the project's code directory (where `BM25_main.py` is located) in your terminal.
-4.  Run the main script:
-    ```bash
-    python BM25_main.py
-    ```
-5.  Monitor the console output for progress and logs. Expect long runtimes for the full dataset, especially during indexing and embedding generation.
+1.  Ensure Prerequisites, Installation, Data Placement, and Configuration in `task_1/config.py` are done.
+2.  Open the notebook task_1/BM25_pipline_exec.ipynb and follow additional instructions step-by-step to generate ir metrics or additionally generate TIRA submission. 
+3.  Monitor the output for progress and logs. Expect long runtimes for the full dataset, especially during preprocessing. 
 
-#### Google Colab Execution
-
-1.  **Upload:** Upload your **entire project code folder** and the **dataset folder** to your Google Drive (e.g., into a folder named `AIR_Project`).
-2.  **Create Notebook & Set Runtime:** Open a Colab notebook, go to `Runtime` -> `Change runtime type`, select `Python 3`, and choose a `GPU` Hardware accelerator (T4 recommended). *(Colab Pro/Pro+ highly recommended for RAM/runtime limits)*.
-3.  **Mount Drive:** Run this cell:
-    ```python
-    from google.colab import drive
-    drive.mount('/content/drive')
-    # Follow auth prompts
-    ```
-4.  **Configure Paths:** **Edit `config.py` on your Google Drive.** Update `DRIVE_PROJECT_ROOT`, `BASE_DIR`, `PROJECT_CODE_DIR`, `OUTPUT_DIR`, `CACHE_DIR` to use absolute paths starting with `/content/drive/MyDrive/...` pointing to your uploaded folders. Verify `DEVICE = "cuda"`.
-5.  **Configure Run Mode:** Edit `config.py` on Drive to set `IS_DEMO_MODE` (`True`/`False`), `REMOVE_STOPWORDS`, `ENABLE_STEMMING`, etc.
-6.  **Install Dependencies:** Run this cell:
-    ```python
-    # Change to your project code directory on Drive
-    %cd /content/drive/MyDrive/AIR_Project/pipeline/
-    # Install (ensure requirements.txt lists faiss-gpu)
-    !pip install -r requirements.txt
-    ```
-7.  **Run Pipeline:** Run this cell:
-    ```python
-    # Ensure you are in the project directory (%cd ...)
-    !python main.py
-    ```
-8.  **Monitor & Wait:** Watch cell output. Be prepared for **long runtimes (hours)** for the full dataset. Keep the tab active (free tier) or rely on background execution (Pro+). Monitor RAM/GPU usage.
+* for some additional information see task_1\ReadMe.
 
 ### Task 2 
 
@@ -205,11 +175,11 @@ This file controls all major aspects of the pipeline. Edit this file before runn
 * Hybrid Re-rank - BM25 (k1 = 1.5, b = 0.75) + ColBERTv2 Re-ranker: `nDCG@10: 0.1316`
 
 ## Group members contribution:
-* Adrian Bergler: Supported BM25 hyperparameter tuning; Experimented with BM25F and the integration of the developed BM25 into Hybrid Re-ranking: Report
-* Christine Hubinger: Lead BM25 implementation (Task1), preprocessing pipeline, and grid search tuning; TIRA submission setup; Report
+* Adrian Bergler: Supported BM25 hyperparameter tuning; Experimented with BM25F and the integration of the developed BM25 into Hybrid Re-ranking; Report
+* Christine Hubinger: Lead BM25 implementation (Task1), preprocessing pipeline, and grid search tuning; TIRA submission setup; groupmeeting organization; Report
 * Dmytro Pashchenko: Report and documentation
 * Margarida Maria Agostinho Gonçalves: Experimented with initial dense retrieval; Report
-* Max Tiessler: Developed and trained SciBERT (Task2); Implemented Hybrid Re-ranking (Task3: BM25 + ColBERT); Developed initail pipeline set-up; TIRA submission setup; Report
+* Max Tiessler: Developed and trained SciBERT (Task2); Implemented Hybrid Re-ranking (Task3: BM25 + ColBERT); Developed initial pipeline set-up; TIRA submission setup; Report
 
 ## Course Context
 
