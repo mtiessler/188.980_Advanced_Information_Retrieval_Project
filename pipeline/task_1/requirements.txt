@@ -1,0 +1,11 @@
+nltk>=3.6
+numpy>=1.21
+pandas>=1.3
+torch>=1.9
+transformers>=4.15
+rank_bm25>=0.2
+faiss-cpu>=1.7
+ir_measures>=0.2
+tqdm>=4.60
+PyStemmer>=2.0
+tira>=0.0.168

@@ -3,8 +3,15 @@ import os
 import logging
 from tqdm.auto import tqdm
 import ir_measures
-import config
 import gc
+
+from pipeline_v2 import config
+
+"""
+This file contains necessary changes to the data loader in order to allow usage of BM25F
+It might contain (several) bugs, since it was not fully run due to the environment issues caused by PyTerrier requiring 
+access to a JDK, that made us decide to stop further experimentation considering the time constraints.
+"""
 
 def stream_document_dicts(doc_dir, content_field='fulltext'):
     logging.info(f"Streaming documents from: {doc_dir} using field '{content_field}'")
@@ -64,6 +71,59 @@ def stream_document_dicts(doc_dir, content_field='fulltext'):
                         logging.error(f"Error processing line in {filename} during streaming: {e}")
         except Exception as e:
             logging.error(f"Error reading file {filepath} during streaming: {e}")
+
+
+def stream_document_dicts_fields(doc_dir,
+                                 content_field='fulltext',
+                                 demo_limit=None):
+    """
+    Yield dicts with *separate* 'title', 'abstract', 'main_content' strings.
+    Empty strings are allowed – PyTerrier will just ignore them when scoring.
+    """
+    logging.info(f"Streaming docs from {doc_dir} — keeping distinct fields")
+    files = [f for f in os.listdir(doc_dir) if f.endswith('.jsonl')]
+
+    # demo mode limit
+    if config.IS_DEMO_MODE:
+        demo_limit = demo_limit or getattr(config, 'DEMO_FILES_LIMIT', 1)
+        files = files[:demo_limit]
+        logging.warning(f"DEMO MODE: scanning {len(files)} file(s)")
+
+    if not files:
+        logging.error(f"No .jsonl files found in {doc_dir}")
+        return
+
+    for fname in tqdm(files, desc="Docs"):
+        path = os.path.join(doc_dir, fname)
+        try:
+            with open(path, encoding='utf-8') as fh:
+                for line in fh:
+                    try:
+                        d = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+
+                    doc_id = d.get("id")
+                    if not doc_id:
+                        continue
+
+                    title = d.get("title") or ""
+                    abstract_raw = d.get("abstract") or ""
+                    main_raw = d.get(content_field) or ""
+
+                    # very short strings or URLs are often noise
+                    def _clean(s):
+                        return "" if (not isinstance(s, str) or
+                                      s.startswith(("http://", "https://")) or
+                                      len(s) < 10) else s
+                    yield {
+                        "id": str(doc_id),
+                        "title": _clean(title),
+                        "abstract": _clean(abstract_raw),
+                        content_field: _clean(main_raw),
+                    }
+        except Exception as e:
+            logging.error(f"Could not read {path}: {e}")
 
 def load_documents_structure(doc_dir, content_field=config.CONTENT_FIELD):
     logging.info(f"Loading required document data from: {doc_dir} (using content field: '{content_field}')")

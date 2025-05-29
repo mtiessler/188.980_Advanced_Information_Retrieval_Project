@@ -8,3 +8,4 @@ faiss-cpu>=1.7
 ir_measures>=0.2
 tqdm>=4.60
 PyStemmer>=2.0
+tira>=0.0.168

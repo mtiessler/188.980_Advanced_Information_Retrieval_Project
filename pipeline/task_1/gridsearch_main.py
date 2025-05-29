@@ -13,7 +13,7 @@ import os
 logging.info("Starting Main Execution")
 logging.info(f"Current Working Directory: {os.getcwd()}")
 logging.info(f"Using device: {config.DEVICE}")
-logging.info(f"Embedding Model: {config.EMBEDDING_MODEL_NAME}")
+#logging.info(f"Embedding Model: {config.EMBEDDING_MODEL_NAME}")
 logging.info(f"Cross-Encoder Model: {config.CROSS_ENCODER_MODEL_NAME}")
 logging.info(f"DEMO MODE ACTIVE: {config.IS_DEMO_MODE}")
 if config.IS_DEMO_MODE:
@@ -21,8 +21,36 @@ if config.IS_DEMO_MODE:
 
 
 if __name__ == "__main__":
-    k1s = [1.2, 1.5, 1.8, 2.0]
-    bs = [0.6, 0.7, 0.75, 0.85]
+    # 1) 
+    ## k1s = [1.2, 1.5, 1.8, 2.0]
+    ## bs = [0.6, 0.7, 0.75, 0.85]
+    # 2) 
+    ## k1s = [0.95, 1.0, 1.05, 1.1, 1.2]
+    ## bs = [0.65, 0.7, 0.75]
+    # 3) 
+    ##k1s = [0.9, 0.85]
+    ##bs = [0.75, 0.8]
+    # 4)
+    ## k1s = [0.8, 0.75]
+    ## bs = [0.7, 0.75, 0.8]
+    # 5)
+    ## k1s = [0.7, 0.65, 0.6]
+    ## bs = [0.75, 0.8, 0.85]
+    # 6) 
+    ## k1s = [0.55, 0.5, 0.4]
+    ## bs = [0.75, 0.8, 0.85]
+    # 7)
+    ## k1s = [0.1, 0.2, 0.3]
+    ## bs = [0.7, 0.75, 0.8, 0.85]
+
+    # top 1 for abstract: k=1.0/b=0.7: nDCG@10: 0.1778
+    # top 1 for fullText: k=0.2/b=0.8: nDCG@10: 0.2002
+
+    ## general: b=0.7 - 0.8 delivers good results with all k
+
+    k1s = [0.2]
+    bs = [0.8]
+
     for k1 in k1s:
         for b in bs:
             config.BM25_K1 = k1
