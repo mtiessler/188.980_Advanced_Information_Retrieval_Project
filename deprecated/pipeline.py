@@ -167,7 +167,6 @@ class RetrievalPipeline:
                 return False
         return True
 
-        # Placeholder for setting up the dense retriever (Task 2)
     def setup_bert_dense(self):
         if self.bert_dense_retriever is None:
             logging.info("--- Setting up BERT Dense Retriever ---")
