@@ -38,10 +38,6 @@ class RetrievalPipeline:
         os.makedirs(config.OUTPUT_DIR, exist_ok=True)
         os.makedirs(config.CACHE_DIR, exist_ok=True)
 
-
-    def teste(self):
-        print('1')
-
     def load_data(self):
         logging.info("--- Loading Data ---")
         try:
@@ -266,92 +262,7 @@ class RetrievalPipeline:
         logging.info(f"--- Finished Pipeline: Basic BM25 ({(end_time - start_time):.2f} seconds) ---")
         return run_results, bm25_execution_name
 
-    # Placeholder for Task 2: Representation Learning (e.g., MS-MARCO based dense retrieval)
-    # Placeholder for Task 2: Representation Learning (e.g., MS-MARCO based dense retrieval)
-    # def run_bert_dense(self):
-    #     logging.info("--- Starting Pipeline: Representation Learning (BERT Dense) ---")
-    #     start_time = time.time()
-
-    #     # Placeholder: Define execution name based on model and parameters
-    #     # Placeholder: dense_model_id = config.DENSE_MODEL_NAME.split('/')[-1]
-    #     dense_model_id = config.DENSE_MODEL_NAME.split('/')[-1]# ADDED
-    #     dense_execution_name = f"BERT_Dense_Placeholder" # Replace with actual naming logic
-    #     dense_execution_name += f"_{config.CONTENT_FIELD}"
-    #     dense_execution_name += "_demo" if config.IS_DEMO_MODE else ""
-
-    #     # Placeholder: Setup the dense retriever
-    #     if not self.setup_bert_dense():
-    #          logging.error("BERT Dense setup failed. Aborting Dense run.")
-    #          return None, f"{dense_execution_name}_FAILED"
-
-    #     # Placeholder: Check if retriever is ready
-    #     if self.bert_dense_retriever is None: # or index not ready
-    #         logging.error("BERT Dense retriever not ready. Aborting search.")
-    #         return None, f"{dense_execution_name}_FAILED"
-
-    #     run_results = {}
-    #     num_queries = len(self.queries)
-    #     processed_count = 0
-    #     logging.info(f"Processing {num_queries} queries with BERT Dense (Placeholder)...")
-
-    #     # Placeholder: Load MS-MARCO model (or specify path in config)
-    #     model = AutoModel.from_pretrained(config.DENSE_MODEL_NAME)
-    #     tokenizer = AutoTokenizer.from_pretrained(config.DENSE_MODEL_NAME)
-    #     logging.info("Placeholder: Load MS-MARCO model")
-
-    #     # Placeholder: Train/Fine-tune the model
-    #     # Requires training data, loss function, optimizer, training loop
-    #     logging.info("Placeholder: Train/Fine-tune the model")
-    #     # train_model(model, train_data, ...)
-
-    #     # Placeholder: Evaluate the trained model
-    #     # Requires evaluation data, metrics
-    #     logging.info("Placeholder: Evaluate the trained model")
-    #     # evaluate_model(model, eval_data, ...)
-
-    #     # Placeholder: Push model to Hugging Face Hub
-    #     # Requires HF credentials, repository setup
-    #     logging.info("Placeholder: Push model to Hugging Face Hub")
-    #     # model.push_to_hub("your-hf-username/your-model-name")
-    #     # tokenizer.push_to_hub("your-hf-username/your-model-name")
-
-    #     # Placeholder: Perform Inference (Dense Retrieval)
-    #     logging.info("Placeholder: Perform Inference (Dense Retrieval)")
-    #     # Placeholder: Build or load document index
-    #     # self.bert_dense_retriever.build_index(self.documents) or load_index(...)
-    #     for qid, query_text in tqdm(self.queries.items(), desc=f"BERT Dense Search ({dense_execution_name})"):
-    #          if not query_text:
-    #              logging.warning(f"Skipping empty query for QID: {qid}")
-    #              run_results[qid] = {}
-    #              continue
-    #          try:
-    #              # Placeholder: Actual search call
-    #              # query_run_results = self.bert_dense_retriever.search(query_text, k=config.FINAL_TOP_K)
-    #              query_run_results = {} # Replace with actual results
-    #              run_results[qid] = query_run_results
-    #              processed_count += 1
-    #          except Exception as e:
-    #              logging.error(f"Error processing query QID {qid} with BERT Dense: {e}", exc_info=True)
-    #              run_results[qid] = {}
-
-    #     logging.info(f"Processed {processed_count}/{num_queries} queries (Placeholder).")
-
-    #     # Save the run results
-    #     run_file_name = f"run_{dense_execution_name}.txt"
-    #     run_file_path = os.path.join(config.OUTPUT_DIR, run_file_name)
-    #     try:
-    #         #Placeholder: dummy results for placeholder
-    #         utils.save_run(run_results, config.OUTPUT_DIR, run_file_name, dense_execution_name)
-    #         logging.info(f"BERT Dense run results saved to {run_file_path} (Placeholder)")
-    #     except Exception as e:
-    #         logging.error(f"Failed to save BERT Dense run results: {e}")
-
-
-    #     end_time = time.time()
-    #     logging.info(f"--- Finished Pipeline: Representation Learning (BERT Dense) ({(end_time - start_time):.2f} seconds) ---")
-    #     #Placeholder: Return placeholder results and name
-    #     return run_results, dense_execution_name
-#####################################################################################################################################
+   
     def run_bert_dense(self):
         logging.info("--- Starting Pipeline: BERT Dense Retrieval ---")
         print("--- Starting Pipeline: BERT Dense Retrieval ---")
@@ -395,7 +306,7 @@ class RetrievalPipeline:
     
         logging.info(f"--- Finished BERT Dense Retrieval in {(time.time() - start_time):.2f}s ---")
         return run_results, dense_execution_name
-################################################################################################################
+
 
     def run_hybrid_rerank(self):
         logging.info("--- Starting Pipeline: BM25 + BERT Re-rank ---")
