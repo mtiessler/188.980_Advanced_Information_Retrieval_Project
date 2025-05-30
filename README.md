@@ -77,7 +77,7 @@ pipeline/
 │   ├── evaluation.ipynb
 │   ├── exec_and_uploader.ipynb  # Execution for submission files
 ├── __init__.py
-└── deprecated/           # Initial pipeline attempts, experiments done 
+deprecated/           # Initial pipeline attempts, experiments done
 ```
 
 ## Setup
@@ -175,7 +175,7 @@ This file controls all major aspects of the pipeline. Edit this file before runn
 * Hybrid Re-rank - BM25 (k1 = 1.5, b = 0.75) + ColBERTv2 Re-ranker: `nDCG@10: 0.1316`
 
 ## Group members contribution:
-* Adrian Bergler: Supported BM25 hyperparameter tuning; Experimented with BM25F and the integration of the developed BM25 into Hybrid Re-ranking; Report
+* Adrian Bergler: Supported BM25 implementation & tuning; Experimented with BM25F, the integration of the developed BM25 into Hybrid Re-ranking and some other Task 3 tuning; Report
 * Christine Hubinger: Lead BM25 implementation (Task1), preprocessing pipeline, and grid search tuning; TIRA submission setup; groupmeeting organization; Report
 * Dmytro Pashchenko: Report and documentation
 * Margarida Maria Agostinho Gonçalves: Experimented with initial dense retrieval; Report
